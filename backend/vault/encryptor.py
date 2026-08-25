@@ -1,4 +1,4 @@
-﻿"""
+"""
 ADFIR Platform — AES-256-GCM Encryptor
 =========================================
 Encrypts and decrypts evidence artifact bytes using AES-256-GCM.
@@ -14,8 +14,11 @@ TODO (Phase 1):
 
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 import os
+from typing import Tuple
 
-def encrypt(plaintext: bytes, key: bytes) -> tuple[bytes, bytes]:
+
+def encrypt(plaintext: bytes, key: bytes) -> Tuple[bytes, bytes]:
+
     """
     Encrypt ``plaintext`` with AES-256-GCM using a fresh random 96-bit nonce.
 

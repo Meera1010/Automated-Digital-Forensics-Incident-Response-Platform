@@ -12,6 +12,7 @@ TODO (Phase 1): Implement store() and retrieve() using hasher + encryptor.
 import logging
 import os
 import uuid
+from typing import Optional
 from flask import current_app
 
 from backend.audit.writer import write_audit
@@ -36,9 +37,10 @@ def _get_master_key() -> bytes:
 def store(
     artifact_bytes: bytes,
     artifact_type: str,
-    incident_id: str | None = None,
-    filename: str | None = None,
+    incident_id: Optional[str] = None,
+    filename: Optional[str] = None,
 ) -> EvidenceArtifact:
+
     """
     Hash, encrypt with AES-256-GCM, and persist an evidence artifact to disk + DB.
 

@@ -6,6 +6,7 @@ the platform.  All timestamps are stored and compared in UTC.
 """
 
 from datetime import datetime, timezone, timedelta
+from typing import Optional
 
 
 def utc_now() -> datetime:
@@ -40,7 +41,8 @@ def is_within_window(dt: datetime, window_seconds: int) -> bool:
     return to_utc(dt) >= threshold
 
 
-def is_outside_business_hours(dt: datetime | None = None) -> bool:
+def is_outside_business_hours(dt: Optional[datetime] = None) -> bool:
+
     """
     Return True if the given datetime (or now) falls outside typical
     business hours (09:00–18:00 UTC Monday–Friday).

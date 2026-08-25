@@ -12,6 +12,11 @@ Usage:
 
 import os
 from datetime import timedelta
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 
 
 class BaseConfig:
@@ -105,6 +110,9 @@ class BaseConfig:
     )
     # Maximum number of actions a single response playbook may contain.
     MAX_PLAYBOOK_ACTIONS: int = 10
+    # Enable/disable background job scheduler.
+    SCHEDULER_ENABLED: bool = os.environ.get("SCHEDULER_ENABLED", "True").lower() in ("true", "1", "yes")
+
 
     # ------------------------------------------------------------------
     # Logging
@@ -196,7 +204,11 @@ _CONFIG_MAP: dict = {
 }
 
 
-def get_config(env: str | None = None) -> type:
+from typing import Optional
+
+
+def get_config(env: Optional[str] = None) -> type:
+
     """
     Return the configuration class for the given environment name.
 

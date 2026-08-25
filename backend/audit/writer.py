@@ -20,6 +20,7 @@ TODO (Phase 1): Implement write_audit() with chained checksum computation.
 import hashlib
 import json
 import logging
+from typing import Optional, Union
 from uuid import UUID
 
 from backend.extensions import db
@@ -38,8 +39,8 @@ def compute_row_checksum(
     actor_id: str,
     module: str,
     action: str,
-    target_type: str | None,
-    target_id_str: str | None,
+    target_type: Optional[str],
+    target_id_str: Optional[str],
     detail_str: str,
 ) -> str:
     """Compute the SHA-256 digest for a single audit log entry."""
@@ -53,12 +54,13 @@ def compute_row_checksum(
 def write_audit(
     module: str,
     action: str,
-    target_type: str | None = None,
-    target_id: UUID | str | None = None,
-    detail: dict | None = None,
+    target_type: Optional[str] = None,
+    target_id: Optional[Union[UUID, str]] = None,
+    detail: Optional[dict] = None,
     actor_type: str = "system",
     actor_id: str = "system",
 ) -> AuditLog:
+
     """
     Append an entry to the audit log with chained integrity checksum.
 

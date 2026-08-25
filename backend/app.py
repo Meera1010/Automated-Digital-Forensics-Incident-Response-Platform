@@ -20,6 +20,7 @@ Usage:
 
 import os
 import logging
+from typing import Optional
 from flask import Flask, jsonify
 
 from backend.config import get_config
@@ -28,7 +29,8 @@ from backend.extensions import db, jwt, cors, scheduler
 logger = logging.getLogger(__name__)
 
 
-def create_app(env: str | None = None) -> Flask:
+def create_app(env: Optional[str] = None) -> Flask:
+
     """
     Flask application factory.
 
