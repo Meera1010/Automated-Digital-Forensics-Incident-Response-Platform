@@ -122,7 +122,7 @@ def register():
     # Create new user and hash password securely
     user = User(
         username=username,
-        role=target_role,
+        role=target_role.value,
         is_active=True,
     )
     user.set_password(password)
@@ -135,7 +135,7 @@ def register():
         action="auth.registered",
         actor_type="user",
         actor_id=str(user.id),
-        detail={"username": user.username, "role": user.role.value},
+        detail={"username": user.username, "role": user.role},
     )
 
     return jsonify({
@@ -195,7 +195,7 @@ def login():
     access_token = create_access_token(
         identity=str(user.id),
         additional_claims={
-            "role": user.role.value,
+            "role": user.role,
             "username": user.username,
         },
     )
@@ -205,7 +205,7 @@ def login():
         action="auth.login_success",
         actor_type="user",
         actor_id=str(user.id),
-        detail={"username": user.username, "role": user.role.value},
+        detail={"username": user.username, "role": user.role},
     )
 
     return jsonify({
@@ -255,6 +255,7 @@ def me():
 
 
 @auth_bp.get("/users")
+@jwt_required()
 @roles_required("admin")
 def list_users():
     """

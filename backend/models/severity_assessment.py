@@ -11,7 +11,8 @@ determines the incident's current severity field.
 """
 
 from sqlalchemy import Column, SmallInteger, Numeric, String, DateTime, ForeignKey, Text
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import JSON
+from backend.models.base import UUIDType
 from sqlalchemy.orm import relationship
 
 from backend.extensions import db
@@ -27,7 +28,7 @@ class SeverityAssessment(UUIDPrimaryKeyMixin, db.Model):
 
     # The incident this assessment belongs to.
     incident_id = Column(
-        UUID(as_uuid=True),
+        UUIDType(),
         ForeignKey("incidents.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
@@ -63,7 +64,7 @@ class SeverityAssessment(UUIDPrimaryKeyMixin, db.Model):
     assigned_severity = Column(String(4), nullable=False)
 
     # Machine-readable explanation of the scoring breakdown.
-    rationale_json = Column(JSONB, nullable=False, default=dict)
+    rationale_json = Column(JSON, nullable=False, default=dict)
 
     # Relationship
     incident = relationship("Incident", back_populates="severity_assessments")

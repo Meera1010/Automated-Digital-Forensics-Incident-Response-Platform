@@ -7,7 +7,6 @@ Stores the result as an EvidenceArtifact and a Report DB record.
 import os
 import hashlib
 from datetime import datetime, timezone
-from sqlalchemy.orm import joinedload
 from backend.extensions import db
 from backend.models.incident import Incident
 from backend.models.investigation_record import InvestigationRecord
@@ -25,9 +24,7 @@ REPORTS_DIR = os.path.join(os.path.dirname(__file__), "..", "..", "storage", "re
 os.makedirs(REPORTS_DIR, exist_ok=True)
 
 def _build_report_context(incident_id: str) -> dict:
-    incident = db.session.query(Incident).options(
-        joinedload(Incident.detection_hits)
-    ).get(incident_id)
+    incident = db.session.query(Incident).get(incident_id)
     
     if not incident:
         raise ValueError(f"Incident {incident_id} not found.")
@@ -50,7 +47,7 @@ def _build_report_context(incident_id: str) -> dict:
             "rule_name": hit.rule.name if hit.rule else "Unknown",
             "severity": hit.rule.severity if hit.rule else "UNKNOWN",
             "timestamp": hit.timestamp.isoformat()
-        } for hit in incident.detection_hits
+        } for hit in incident.detection_hits.all()
     ]
 
     context = {

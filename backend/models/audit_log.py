@@ -19,12 +19,14 @@ Verifying integrity:
 from sqlalchemy import (
     Column,
     BigInteger,
+    Integer,
     String,
     DateTime,
     Text,
     ForeignKey,
+    JSON,
 )
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from backend.models.base import UUIDType
 
 from backend.extensions import db
 
@@ -37,7 +39,7 @@ class AuditLog(db.Model):
     __tablename__ = "audit_log"
 
     # Sequential integer PK ensures rows can be walked in insertion order.
-    id = Column(BigInteger, primary_key=True, autoincrement=True)
+    id = Column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True)
 
     # UTC timestamp of the event.
     logged_at = Column(DateTime(timezone=True), nullable=False, index=True)
@@ -58,10 +60,10 @@ class AuditLog(db.Model):
     target_type = Column(String(64), nullable=True)
 
     # UUID of the affected entity (nullable for global events).
-    target_id = Column(UUID(as_uuid=True), nullable=True, index=True)
+    target_id = Column(UUIDType(), nullable=True, index=True)
 
     # Structured supplementary detail.
-    detail_json = Column(JSONB, nullable=True)
+    detail_json = Column(JSON, nullable=True)
 
     # SHA-256 hex digest of the PREVIOUS row's row_checksum.
     # The very first row stores a fixed sentinel value.

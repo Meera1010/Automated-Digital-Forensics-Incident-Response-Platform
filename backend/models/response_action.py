@@ -8,7 +8,8 @@ each is recorded independently for auditability.
 
 import enum
 from sqlalchemy import Column, String, Integer, DateTime, Text, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import JSON
+from backend.models.base import UUIDType
 from sqlalchemy.orm import relationship
 
 from backend.extensions import db
@@ -31,7 +32,7 @@ class ResponseAction(UUIDPrimaryKeyMixin, db.Model):
 
     # The incident this action was taken for.
     incident_id = Column(
-        UUID(as_uuid=True),
+        UUIDType(),
         ForeignKey("incidents.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
@@ -39,7 +40,7 @@ class ResponseAction(UUIDPrimaryKeyMixin, db.Model):
 
     # The playbook that prescribed this action.
     playbook_id = Column(
-        UUID(as_uuid=True),
+        UUIDType(),
         ForeignKey("response_playbooks.id", ondelete="RESTRICT"),
         nullable=False,
     )
@@ -48,7 +49,7 @@ class ResponseAction(UUIDPrimaryKeyMixin, db.Model):
     action_name = Column(String(128), nullable=False)
 
     # The parameters passed to the action handler (from playbook YAML).
-    action_params_json = Column(JSONB, nullable=False, default=dict)
+    action_params_json = Column(JSON, nullable=False, default=dict)
 
     # Execution outcome.
     status = Column(

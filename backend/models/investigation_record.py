@@ -5,7 +5,7 @@ Records the details and progress of an incident investigation.
 """
 
 from sqlalchemy import Column, String, Text, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+from backend.models.base import UUIDType
 from sqlalchemy.orm import relationship
 
 from backend.extensions import db
@@ -21,7 +21,7 @@ class InvestigationRecord(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
 
     # The incident this investigation documents.
     incident_id = Column(
-        UUID(as_uuid=True),
+        UUIDType(),
         ForeignKey("incidents.id", ondelete="CASCADE"),
         nullable=False,
         index=True,

@@ -7,7 +7,8 @@ into a single Incident by the Orchestrator.
 """
 
 from sqlalchemy import Column, DateTime, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import JSON
+from backend.models.base import UUIDType
 from sqlalchemy.orm import relationship
 
 from backend.extensions import db
@@ -23,7 +24,7 @@ class DetectionHit(UUIDPrimaryKeyMixin, db.Model):
 
     # The rule that produced this hit.
     rule_id = Column(
-        UUID(as_uuid=True),
+        UUIDType(),
         ForeignKey("detection_rules.id", ondelete="RESTRICT"),
         nullable=False,
         index=True,
@@ -31,7 +32,7 @@ class DetectionHit(UUIDPrimaryKeyMixin, db.Model):
 
     # The raw event that triggered the rule.
     raw_event_id = Column(
-        UUID(as_uuid=True),
+        UUIDType(),
         ForeignKey("raw_events.id", ondelete="RESTRICT"),
         nullable=False,
         index=True,
@@ -41,11 +42,11 @@ class DetectionHit(UUIDPrimaryKeyMixin, db.Model):
     fired_at = Column(DateTime(timezone=True), nullable=False, index=True)
 
     # Detailed match context: which fields matched, the threshold count, etc.
-    match_detail_json = Column(JSONB, nullable=False, default=dict)
+    match_detail_json = Column(JSON, nullable=False, default=dict)
 
     # Set by the Orchestrator once this hit is linked to an incident.
     correlated_incident_id = Column(
-        UUID(as_uuid=True),
+        UUIDType(),
         ForeignKey("incidents.id", ondelete="SET NULL"),
         nullable=True,
         index=True,

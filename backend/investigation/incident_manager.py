@@ -121,18 +121,18 @@ class IncidentManager:
 
     def _map_category(self, rule_id_str: str) -> str:
         if rule_id_str.startswith("AUTH"):
-            return "Credential Access"
+            return "BRUTE_FORCE"
         elif rule_id_str.startswith("PROC"):
-            return "Execution"
+            return "MALWARE"
         elif rule_id_str.startswith("NET"):
-            return "Command and Control"
+            return "C2"
         elif rule_id_str.startswith("INT"):
-            return "Defense Evasion"
+            return "INTEGRITY_VIOLATION"
         elif rule_id_str.startswith("FREQ"):
-            return "Impact"
+            return "DOS"
         elif rule_id_str.startswith("FILE"):
-            return "Discovery"
-        return "Unknown"
+            return "EXFILTRATION"
+        return "UNKNOWN"
 
     def update_incident_status(self, incident: Incident, status: str):
         """Update incident status and timestamps."""

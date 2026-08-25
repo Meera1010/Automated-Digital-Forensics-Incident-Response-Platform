@@ -13,7 +13,7 @@ All state transitions are recorded in the audit_log.
 
 import enum
 from sqlalchemy import Column, String, Text, DateTime, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+from backend.models.base import UUIDType
 from sqlalchemy.orm import relationship
 
 from backend.extensions import db
@@ -80,7 +80,7 @@ class Incident(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
 
     # The playbook assigned to this incident during the RESPONDING phase.
     assigned_playbook_id = Column(
-        UUID(as_uuid=True),
+        UUIDType(),
         ForeignKey("response_playbooks.id", ondelete="SET NULL"),
         nullable=True,
     )

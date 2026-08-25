@@ -1,25 +1,16 @@
-﻿name: "Brute Force Response - Critical (P1)"
-attack_category: brute_force
+name: "Brute Force Response - Critical (P1)"
+attack_category: BRUTE_FORCE
 severity_tier: P1
 actions:
-  - action: block_synthetic_ip
+  - action: block_ip
     params:
-      ip_field: source_ip
+      ip_address: "192.168.1.100"
       duration_minutes: 1440
       reason: "P1 brute force — extended block"
-  - action: quarantine_synthetic_asset
+  - action: disable_account
     params:
-      asset_field: primary_asset_id
-      reason: "P1 — asset quarantined pending investigation"
-  - action: capture_memory_snapshot
+      username: "targeted_user"
+      reason: "P1 — account disabled pending investigation"
+  - action: contain_incident
     params:
-      target_asset_field: primary_asset_id
-      label: "p1-brute-force-snapshot"
-  - action: send_alert_notification
-    params:
-      channels: [dashboard, audit_log]
-      message_template: "CRITICAL: Brute force from {source_ip} targeting {primary_asset}. Asset quarantined."
-  - action: reset_synthetic_credentials
-    params:
-      username_field: username
-      reason: "P1 — credentials reset as precaution"
+      reason: "P1 brute force — incident contained"

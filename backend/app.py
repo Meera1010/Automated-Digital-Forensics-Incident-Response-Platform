@@ -202,13 +202,13 @@ def _seed_initial_users(app: Flask) -> None:
     try:
         from backend.models.user import User, UserRole
         if User.query.first() is None:
-            admin = User(username="admin", role=UserRole.ADMIN)
+            admin = User(username="admin", role=UserRole.ADMIN.value)
             admin.set_password("admin123!")
 
-            analyst = User(username="analyst", role=UserRole.ANALYST)
+            analyst = User(username="analyst", role=UserRole.ANALYST.value)
             analyst.set_password("analyst123!")
 
-            supervisor = User(username="supervisor", role=UserRole.SUPERVISOR)
+            supervisor = User(username="supervisor", role=UserRole.SUPERVISOR.value)
             supervisor.set_password("supervisor123!")
 
             db.session.add(admin)

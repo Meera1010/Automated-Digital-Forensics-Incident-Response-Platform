@@ -17,11 +17,11 @@ from sqlalchemy import (
     Text,
     Index,
 )
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID, JSON
 from sqlalchemy.orm import relationship
 
 from backend.extensions import db
-from backend.models.base import TimestampMixin, UUIDPrimaryKeyMixin
+from backend.models.base import TimestampMixin, UUIDPrimaryKeyMixin, UUIDType
 
 
 class RawEvent(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
@@ -51,8 +51,8 @@ class RawEvent(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     # to avoid cascading complexity on lab state changes).
     asset_id = Column(String(64), nullable=True, index=True)
 
-    # Full normalised event payload as JSONB for flexible querying.
-    payload_json = Column(JSONB, nullable=False, default=dict)
+    # Full normalised event payload as JSON for flexible querying.
+    payload_json = Column(JSON, nullable=False, default=dict)
 
     # SHA-256 hex digest of the serialised payload_json.
     # Computed by the ingestion normaliser before INSERT.

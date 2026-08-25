@@ -13,8 +13,7 @@ Roles:
 import uuid
 from datetime import datetime, timezone
 
-from sqlalchemy import Column, String, Boolean, DateTime, Enum as SaEnum
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, String, Boolean, DateTime
 import enum
 
 from backend.extensions import db
@@ -45,9 +44,9 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
 
     # The user's access level.
     role = Column(
-        SaEnum(UserRole, name="user_role_enum"),
+        String(32),
         nullable=False,
-        default=UserRole.READONLY,
+        default=UserRole.READONLY.value,
     )
 
     # Soft-delete / account suspension without removing the audit history.
@@ -57,14 +56,14 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
     last_login_at = Column(DateTime(timezone=True), nullable=True)
 
     def __repr__(self) -> str:
-        return f"<User {self.username!r} role={self.role.value}>"
+        return f"<User {self.username!r} role={self.role}>"
 
     def to_dict(self) -> dict:
         """Return a safe public representation (no password hash)."""
         return {
             "id": str(self.id),
             "username": self.username,
-            "role": self.role.value,
+            "role": self.role.value if isinstance(self.role, UserRole) else self.role,
             "is_active": self.is_active,
             "last_login_at": (
                 self.last_login_at.isoformat() if self.last_login_at else None

@@ -47,16 +47,7 @@ class BaseConfig:
         "postgresql://adfir_user:adfir_pass@localhost:5432/adfir_db",
     )
     SQLALCHEMY_TRACK_MODIFICATIONS: bool = False
-    SQLALCHEMY_ENGINE_OPTIONS: dict = {
-        # Validate connections before handing them back from the pool.
-        "pool_pre_ping": True,
-        # Recycle connections after 5 minutes to avoid stale handles.
-        "pool_recycle": 300,
-        # Keep at most 10 idle connections in the pool.
-        "pool_size": 10,
-        # Allow up to 5 overflow connections under load.
-        "max_overflow": 5,
-    }
+
 
     # ------------------------------------------------------------------
     # JWT Authentication
@@ -155,10 +146,8 @@ class TestingConfig(BaseConfig):
     TESTING = True
 
     SQLALCHEMY_DATABASE_URI: str = os.environ.get(
-        "TEST_DATABASE_URL"
-    ) or os.environ.get(
-        "DATABASE_URL",
-        "postgresql://adfir_user:adfir_pass@localhost:5432/adfir_test_db",
+        "TEST_DATABASE_URL",
+        "sqlite:///:memory:",
     )
 
 

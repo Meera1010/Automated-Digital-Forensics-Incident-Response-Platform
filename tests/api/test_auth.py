@@ -13,12 +13,21 @@ from backend.models.user import User, UserRole
 def test_user_registration(client, app):
     """Test user registration endpoint with valid and invalid payloads."""
     with app.app_context():
+        # Get admin token (admin is seeded in create_app)
+        login_res = client.post("/api/v1/auth/login", json={
+            "username": "admin",
+            "password": "admin123!",
+        })
+        assert login_res.status_code == 200, f"Admin login failed: {login_res.get_json()}"
+        admin_token = login_res.get_json()["access_token"]
+        admin_headers = {"Authorization": f"Bearer {admin_token}"}
+
         # 1. Valid registration
         res = client.post("/api/v1/auth/register", json={
             "username": "sec_analyst_1",
             "password": "SecurePassword123!",
             "role": "analyst",
-        })
+        }, headers=admin_headers)
         assert res.status_code == 201
         data = res.get_json()
         assert data["user"]["username"] == "sec_analyst_1"
@@ -29,26 +38,34 @@ def test_user_registration(client, app):
             "username": "sec_analyst_1",
             "password": "SecurePassword123!",
             "role": "analyst",
-        })
+        }, headers=admin_headers)
         assert res_dup.status_code == 409
 
         # 3. Invalid password (too short)
         res_short = client.post("/api/v1/auth/register", json={
             "username": "invalid_user",
             "password": "short",
-        })
+        }, headers=admin_headers)
         assert res_short.status_code == 400
 
 
 def test_login_and_me_endpoint(client, app):
     """Test login authentication and fetching user profile with JWT."""
     with app.app_context():
+        # Get admin token to register a test user
+        login_admin = client.post("/api/v1/auth/login", json={
+            "username": "admin",
+            "password": "admin123!",
+        })
+        admin_token = login_admin.get_json()["access_token"]
+        admin_headers = {"Authorization": f"Bearer {admin_token}"}
+
         # Register user
         client.post("/api/v1/auth/register", json={
             "username": "auth_test_user",
             "password": "Password123!",
             "role": "viewer",
-        })
+        }, headers=admin_headers)
 
         # Login with correct credentials
         res_login = client.post("/api/v1/auth/login", json={
@@ -71,17 +88,25 @@ def test_login_and_me_endpoint(client, app):
 def test_rbac_authorization(client, app):
     """Test RBAC enforcement on admin-only endpoint."""
     with app.app_context():
+        # Get admin token to register test users
+        login_admin = client.post("/api/v1/auth/login", json={
+            "username": "admin",
+            "password": "admin123!",
+        })
+        admin_token = login_admin.get_json()["access_token"]
+        admin_headers = {"Authorization": f"Bearer {admin_token}"}
+
         # Register viewer and admin users
         client.post("/api/v1/auth/register", json={
             "username": "viewer_user",
             "password": "Password123!",
             "role": "viewer",
-        })
+        }, headers=admin_headers)
         client.post("/api/v1/auth/register", json={
-            "username": "admin_user",
+            "username": "admin_user2",
             "password": "Password123!",
             "role": "admin",
-        })
+        }, headers=admin_headers)
 
         # Login as viewer
         token_viewer = client.post("/api/v1/auth/login", json={
@@ -96,9 +121,9 @@ def test_rbac_authorization(client, app):
         )
         assert res_denied.status_code == 403
 
-        # Login as admin
+        # Login as admin_user2
         token_admin = client.post("/api/v1/auth/login", json={
-            "username": "admin_user",
+            "username": "admin_user2",
             "password": "Password123!",
         }).get_json()["access_token"]
 
@@ -109,4 +134,5 @@ def test_rbac_authorization(client, app):
         )
         assert res_allowed.status_code == 200
         assert res_allowed.get_json()["total"] >= 2
+
 

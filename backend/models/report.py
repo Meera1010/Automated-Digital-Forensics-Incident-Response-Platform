@@ -11,7 +11,7 @@ to maintain the chain of custody.
 
 import enum
 from sqlalchemy import Column, String, DateTime, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+from backend.models.base import UUIDType
 from sqlalchemy.orm import relationship
 
 from backend.extensions import db
@@ -33,7 +33,7 @@ class Report(UUIDPrimaryKeyMixin, db.Model):
 
     # The incident this report documents.
     incident_id = Column(
-        UUID(as_uuid=True),
+        UUIDType(),
         ForeignKey("incidents.id", ondelete="CASCADE"),
         nullable=False,
         index=True,

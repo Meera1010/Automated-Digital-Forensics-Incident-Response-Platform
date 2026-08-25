@@ -28,21 +28,28 @@ def client(app):
     return app.test_client()
 
 
-@pytest.fixture(scope="function")
-def db_session(app):
-    """
-    Provide a database session that rolls back after each test function.
-    This keeps tests isolated without needing to drop/recreate the schema.
-    TODO (Phase 1): Wire up table creation and rollback.
-    """
+@pytest.fixture(scope="session", autouse=True)
+def db_setup(app):
+    """Drop and recreate schema once per test session."""
     from backend.extensions import db as _db
-    import backend.models
+    import backend.models  # noqa: F401 – registers all models with metadata
+    with app.app_context():
+        _db.drop_all()
+        _db.create_all()
+        yield _db
+        _db.drop_all()
+
+@pytest.fixture(scope="function")
+def db_session(app, db_setup):
+    """
+    Provide a database session. Cleans up by truncating tables instead of dropping the schema.
+    """
     from sqlalchemy import text
     with app.app_context():
-        _db.session.execute(text("DROP SCHEMA public CASCADE; CREATE SCHEMA public;"))
-        _db.session.commit()
-        _db.create_all()
-        yield _db.session
-        _db.session.remove()
-        _db.session.execute(text("DROP SCHEMA public CASCADE; CREATE SCHEMA public;"))
-        _db.session.commit()
+        yield db_setup.session
+        db_setup.session.remove()
+        
+        # Clean up all tables in reverse dependency order
+        for table in reversed(db_setup.metadata.sorted_tables):
+            db_setup.session.execute(table.delete())
+        db_setup.session.commit()

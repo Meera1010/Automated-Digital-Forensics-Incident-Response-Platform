@@ -101,6 +101,13 @@ def write_audit(
         detail_str=detail_str,
     )
 
+    target_uuid = None
+    if target_id_str:
+        try:
+            target_uuid = UUID(target_id_str)
+        except ValueError:
+            pass
+            
     entry = AuditLog(
         logged_at=now,
         actor_type=actor_type,
@@ -108,7 +115,7 @@ def write_audit(
         module=module,
         action=action,
         target_type=target_type,
-        target_id=target_id_str if target_id_str else None,
+        target_id=target_uuid,
         detail_json=detail,
         prev_checksum=prev_checksum,
         row_checksum=row_checksum,

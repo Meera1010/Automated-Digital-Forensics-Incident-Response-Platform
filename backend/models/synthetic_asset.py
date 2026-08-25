@@ -11,7 +11,7 @@ Status transitions: active ↔ quarantined, active → offline.
 
 import enum
 from sqlalchemy import Column, String, SmallInteger, Enum as SaEnum
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSON
 
 from backend.extensions import db
 from backend.models.base import TimestampMixin
@@ -62,7 +62,7 @@ class SyntheticAsset(TimestampMixin, db.Model):
     department = Column(String(64), nullable=True)
 
     # Flexible key/value metadata (OS version, installed services, etc.).
-    tags = Column(JSONB, nullable=True, default=dict)
+    tags = Column(JSON, nullable=True, default=dict)
 
     # Current operational status — updated by response actions.
     status = Column(

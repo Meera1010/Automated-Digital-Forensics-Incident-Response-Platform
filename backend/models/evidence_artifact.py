@@ -14,7 +14,8 @@ exception and creates an audit entry flagging potential tampering.
 
 import enum
 from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, LargeBinary
-from sqlalchemy.dialects.postgresql import UUID, JSONB
+from sqlalchemy import JSON
+from backend.models.base import UUIDType
 from sqlalchemy.orm import relationship
 
 from backend.extensions import db
@@ -40,7 +41,7 @@ class EvidenceArtifact(UUIDPrimaryKeyMixin, db.Model):
 
     # The incident this evidence belongs to.
     incident_id = Column(
-        UUID(as_uuid=True),
+        UUIDType(),
         ForeignKey("incidents.id", ondelete="CASCADE"),
         nullable=True,
         index=True,
@@ -75,10 +76,10 @@ class EvidenceArtifact(UUIDPrimaryKeyMixin, db.Model):
     source = Column(String(256), nullable=False, default="unknown")
 
     # Arbitrary metadata related to the evidence
-    artifact_metadata = Column(JSONB, nullable=False, default=dict)
+    artifact_metadata = Column(JSON, nullable=False, default=dict)
 
     # Chain-of-custody log: [{action, actor, timestamp}] — append-only in code.
-    chain_of_custody = Column(JSONB, nullable=False, default=list)
+    chain_of_custody = Column(JSON, nullable=False, default=list)
 
     # Relationship
     incident = relationship("Incident", back_populates="evidence_artifacts")
