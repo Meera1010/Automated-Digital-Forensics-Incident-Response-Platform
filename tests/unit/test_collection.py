@@ -10,7 +10,7 @@ from backend.extensions import db
 from backend.models.evidence_artifact import EvidenceArtifact
 from backend.vault import vault_manager
 
-def test_synthetic_event_collection(app):
+def test_synthetic_event_collection(app, db_session):
     with app.app_context():
         # Setup incident
         incident = Incident(

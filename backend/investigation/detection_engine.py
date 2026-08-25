@@ -87,6 +87,18 @@ class DetectionEngine:
                             }
                         )
                         db.session.add(hit)
+                        db.session.flush() # ensure hit.id is available
+                        
+                        from backend.audit.writer import write_audit
+                        write_audit(
+                            module="detection_engine",
+                            action="detection.event_triggered",
+                            target_type="DetectionHit",
+                            target_id=hit.id,
+                            detail={"rule_id": rule.rule_id, "event_id": str(event.id)},
+                            actor_id="system_detector"
+                        )
+                        
                         hits_created += 1
                         logger.warning(f"DetectionHit triggered: {rule.rule_id} on event {event.id}")
                 except Exception as e:

@@ -89,6 +89,18 @@ class IncidentManager:
         )
         db.session.add(investigation)
         
+        db.session.flush() # ensure investigation has an id
+        
+        from backend.audit.writer import write_audit
+        write_audit(
+            module="incident_manager",
+            action="incident.created",
+            target_type="Incident",
+            target_id=incident.id,
+            detail={"incident_number": incident.incident_number, "rule_id_str": rule_id_str},
+            actor_id="system_incident_manager"
+        )
+        
         db.session.commit()
         
         # 10. Run Automated Investigation

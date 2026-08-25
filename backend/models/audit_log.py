@@ -90,3 +90,13 @@ class AuditLog(db.Model):
             "detail_json": self.detail_json,
             "row_checksum": self.row_checksum,
         }
+
+from sqlalchemy import event
+
+@event.listens_for(AuditLog, 'before_update')
+def receive_before_update(mapper, connection, target):
+    raise ValueError("Audit log entries are immutable and cannot be updated.")
+
+@event.listens_for(AuditLog, 'before_delete')
+def receive_before_delete(mapper, connection, target):
+    raise ValueError("Audit log entries are immutable and cannot be deleted.")

@@ -43,7 +43,19 @@ def create_rule():
     # TODO: Validate input with DetectionRuleCreateSchema.
     # TODO: Parse and validate conditions_yaml.
     # TODO: Persist DetectionRule.
-    # TODO: Write audit log entry.
+    from backend.audit.writer import write_audit
+    from flask_jwt_extended import get_jwt_identity
+    
+    actor_id = get_jwt_identity() or "unknown_user"
+    
+    write_audit(
+        module="rules_api",
+        action="configuration.rule_created",
+        target_type="DetectionRule",
+        target_id=None,
+        detail={"status": "stub_create"},
+        actor_id=actor_id
+    )
     return jsonify({"message": "Not yet implemented"}), 501
 
 
@@ -58,7 +70,19 @@ def update_rule(rule_id):
     # TODO: Fetch existing rule or 404.
     # TODO: Validate updated fields.
     # TODO: Increment rule.version, persist.
-    # TODO: Write audit log entry.
+    from backend.audit.writer import write_audit
+    from flask_jwt_extended import get_jwt_identity
+    
+    actor_id = get_jwt_identity() or "unknown_user"
+    
+    write_audit(
+        module="rules_api",
+        action="configuration.rule_updated",
+        target_type="DetectionRule",
+        target_id=rule_id,
+        detail={"status": "stub_update"},
+        actor_id=actor_id
+    )
     return jsonify({"message": "Not yet implemented"}), 501
 
 
@@ -68,5 +92,17 @@ def toggle_rule(rule_id):
     """Enable or disable a detection rule."""
     # TODO: Verify supervisor role.
     # TODO: Flip rule.enabled, persist.
-    # TODO: Write audit log entry.
+    from backend.audit.writer import write_audit
+    from flask_jwt_extended import get_jwt_identity
+    
+    actor_id = get_jwt_identity() or "unknown_user"
+    
+    write_audit(
+        module="rules_api",
+        action="configuration.rule_toggled",
+        target_type="DetectionRule",
+        target_id=rule_id,
+        detail={"status": "stub_toggle"},
+        actor_id=actor_id
+    )
     return jsonify({"message": "Not yet implemented"}), 501

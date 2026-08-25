@@ -152,6 +152,18 @@ class AutomatedInvestigator:
             record.status = "COMPLETED"
             
         db.session.add(incident)
+        db.session.flush() # ensure record has id
+        
+        from backend.audit.writer import write_audit
+        write_audit(
+            module="automated_investigator",
+            action="investigation.automated_action",
+            target_type="InvestigationRecord",
+            target_id=record.id,
+            detail={"incident_number": incident.incident_number, "status": record.status},
+            actor_id="system_investigator"
+        )
+        
         db.session.commit()
         
     def _map_severity(self, rule_severity: int) -> str:

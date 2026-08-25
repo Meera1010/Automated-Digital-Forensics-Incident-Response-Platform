@@ -22,7 +22,7 @@ def create_event(event_type, source_ip="192.168.1.100", payload_json=None, recei
         received_at=received_at
     )
 
-def test_repeated_failed_login_rule(app):
+def test_repeated_failed_login_rule(app, db_session):
     with app.app_context():
         engine = DetectionEngine()
         engine.sync_rules()
@@ -47,7 +47,7 @@ def test_repeated_failed_login_rule(app):
         assert hit.match_detail_json["rule_id_str"] == "AUTH-001"
         assert hit.match_detail_json["severity"] == 7
 
-def test_suspicious_process_execution_rule(app):
+def test_suspicious_process_execution_rule(app, db_session):
     with app.app_context():
         engine = DetectionEngine()
         engine.sync_rules()
@@ -66,7 +66,7 @@ def test_suspicious_process_execution_rule(app):
         hit = db.session.query(DetectionHit).order_by(DetectionHit.fired_at.desc()).first()
         assert hit.match_detail_json["rule_id_str"] == "PROC-001"
 
-def test_unexpected_network_activity_rule(app):
+def test_unexpected_network_activity_rule(app, db_session):
     with app.app_context():
         engine = DetectionEngine()
         engine.sync_rules()
@@ -85,7 +85,7 @@ def test_unexpected_network_activity_rule(app):
         hit = db.session.query(DetectionHit).order_by(DetectionHit.fired_at.desc()).first()
         assert hit.match_detail_json["rule_id_str"] == "NET-001"
 
-def test_evidence_integrity_violation_rule(app):
+def test_evidence_integrity_violation_rule(app, db_session):
     with app.app_context():
         engine = DetectionEngine()
         engine.sync_rules()
@@ -100,7 +100,7 @@ def test_evidence_integrity_violation_rule(app):
         hit = db.session.query(DetectionHit).order_by(DetectionHit.fired_at.desc()).first()
         assert hit.match_detail_json["rule_id_str"] == "INT-001"
 
-def test_abnormal_event_frequency_rule(app):
+def test_abnormal_event_frequency_rule(app, db_session):
     with app.app_context():
         engine = DetectionEngine()
         engine.sync_rules()
@@ -121,7 +121,7 @@ def test_abnormal_event_frequency_rule(app):
         hit = db.session.query(DetectionHit).order_by(DetectionHit.fired_at.desc()).first()
         assert hit.match_detail_json["rule_id_str"] == "FREQ-001"
 
-def test_suspicious_file_activity_rule(app):
+def test_suspicious_file_activity_rule(app, db_session):
     with app.app_context():
         engine = DetectionEngine()
         engine.sync_rules()

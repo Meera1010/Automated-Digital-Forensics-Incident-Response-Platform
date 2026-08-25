@@ -38,8 +38,18 @@ def download_report(report_id):
     Verifies the file hash before serving.
     Creates an audit log entry.
     """
-    # TODO: Fetch Report by ID or 404.
-    # TODO: Verify SHA-256 of file on disk matches report.sha256_hash.
-    # TODO: Write audit log entry.
-    # TODO: Return file via send_file().
+    from backend.audit.writer import write_audit
+    from flask_jwt_extended import get_jwt_identity
+    
+    actor_id = get_jwt_identity() or "unknown_user"
+    
+    write_audit(
+        module="reports_api",
+        action="report.generated",
+        target_type="Report",
+        target_id=report_id,
+        detail={"status": "stub_download"},
+        actor_id=actor_id
+    )
+    
     return jsonify({"message": "Not yet implemented"}), 501
