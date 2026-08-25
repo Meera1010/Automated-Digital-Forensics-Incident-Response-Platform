@@ -32,12 +32,14 @@ const App = {
 
   // -----------------------------------------------------------------------
   showLogin() {
-    document.getElementById("modal-login")?.showModal();
+    document.getElementById("section-login").classList.remove("app-wrapper--hidden");
+    document.getElementById("app-wrapper").classList.add("app-wrapper--hidden");
     this.stopPolling();
   },
 
   async showApp() {
-    document.getElementById("modal-login")?.close();
+    document.getElementById("section-login").classList.add("app-wrapper--hidden");
+    document.getElementById("app-wrapper").classList.remove("app-wrapper--hidden");
     try {
       const user = await Api.me();
       this.setCurrentUser(user);
@@ -116,13 +118,16 @@ const App = {
 
     // Update page title.
     const titles = {
-      dashboard: ["Dashboard", "Live threat overview"],
-      incidents: ["Incidents", "All detected incidents"],
-      events:    ["Event Stream", "Live raw event feed"],
-      evidence:  ["Evidence", "Collected artifacts"],
-      rules:     ["Detection Rules", "Rule library"],
-      reports:   ["Reports", "Forensic reports"],
-      audit:     ["Audit Log", "Immutable action trail"],
+      dashboard:    ["Dashboard", "Live threat overview"],
+      incidents:    ["Incidents", "All detected incidents"],
+      alerts:       ["Alerts Stream", "Live raw event feed"],
+      evidence:     ["Evidence", "Collected artifacts"],
+      verification: ["Evidence Verification", "Cryptographic integrity checks"],
+      rules:        ["Detection Rules", "Rule library"],
+      responses:    ["Automated Responses", "Execution playbooks"],
+      reports:      ["Reports", "Forensic reports"],
+      audit:        ["Audit Log", "Immutable action trail"],
+      status:       ["System Status", "Platform health & telemetry"],
     };
     const [title, sub] = titles[section] || ["ADFIR", ""];
     document.getElementById("page-title").textContent = title;
@@ -138,11 +143,14 @@ const App = {
       switch (section) {
         case "dashboard": await Dashboard.load(); break;
         case "incidents": await IncidentsList.load(); break;
-        case "events":    await EventStream.load(); break;
+        case "alerts":    await AlertsStream.load(); break;
         case "evidence":  await EvidenceList.load(); break;
+        case "verification": await VerificationList.load(); break;
         case "rules":     await RulesList.load(); break;
+        case "responses": await ResponsesList.load(); break;
         case "reports":   await ReportsList.load(); break;
         case "audit":     await AuditLog.load(); break;
+        case "status":    await SystemStatus.load(); break;
       }
     } catch (err) {
       console.warn(`Failed to load section "${section}":`, err.message);
@@ -202,13 +210,16 @@ const App = {
 // Stub module objects — will be replaced by section-specific scripts.
 // -------------------------------------------------------------------------
 
-const Dashboard     = { load: async () => {} };
-const IncidentsList = { load: async () => {} };
-const EventStream   = { load: async () => {} };
-const EvidenceList  = { load: async () => {} };
-const RulesList     = { load: async () => {} };
-const ReportsList   = { load: async () => {} };
-const AuditLog      = { load: async () => {} };
+const Dashboard        = { load: async () => {} };
+const IncidentsList    = { load: async () => {} };
+const AlertsStream     = { load: async () => {} };
+const EvidenceList     = { load: async () => {} };
+const VerificationList = { load: async () => {} };
+const RulesList        = { load: async () => {} };
+const ResponsesList    = { load: async () => {} };
+const ReportsList      = { load: async () => {} };
+const AuditLog         = { load: async () => {} };
+const SystemStatus     = { load: async () => {} };
 
 // Expose globally for cross-module access.
 window.App = App;

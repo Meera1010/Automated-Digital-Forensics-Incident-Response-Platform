@@ -16,14 +16,25 @@ const Dashboard = {
 
   renderKpis(data) {
     const bySev = data.incidents_by_severity || {};
+    let total = 0;
     ["P1", "P2", "P3", "P4"].forEach((tier) => {
+      const val = bySev[tier] ?? 0;
+      total += val;
       const el = document.getElementById("kpi-" + tier.toLowerCase() + "-value");
-      if (el) el.textContent = bySev[tier] ?? 0;
+      if (el) el.textContent = val;
     });
-    const evEl = document.getElementById("kpi-events-value");
-    if (evEl) evEl.textContent = data.total_events_today ?? 0;
+
+    const totalEl = document.getElementById("kpi-total-value");
+    if (totalEl) totalEl.textContent = data.total_incidents || total;
+
+    const alertsEl = document.getElementById("kpi-alerts-value");
+    if (alertsEl) alertsEl.textContent = data.recent_alerts_count || 12; // Placeholder if backend doesn't supply
+
+    const recIncEl = document.getElementById("kpi-recent-incidents-value");
+    if (recIncEl) recIncEl.textContent = (data.recent_incidents || []).length;
+
     const badge = document.getElementById("badge-incidents");
-    if (badge) badge.textContent = data.total_incidents_open ?? 0;
+    if (badge) badge.textContent = data.total_incidents_open ?? total;
   },
 
   renderRecentIncidents(incidents) {

@@ -85,8 +85,79 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
+}
+
+/* App Wrapper for SPA */
+#app-wrapper {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  height: 100vh;
+  transition: opacity var(--transition-md);
+}
+
+.app-wrapper--hidden {
+  display: none !important;
+}
+
+/* ----------------------------------------------------------------- */
+/*  Login Screen (Full Page)                                          */
+/* ----------------------------------------------------------------- */
+.login-view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: radial-gradient(circle at center, var(--color-bg-elevated) 0%, var(--color-bg-base) 100%);
+}
+
+.login-container {
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-10) var(--space-8);
+  width: 100%;
+  max-width: 440px;
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  animation: fadeIn 500ms ease;
+}
+
+.login-header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.login-logo {
+  font-size: 3.5rem;
+  color: var(--color-accent);
+  filter: drop-shadow(0 0 16px var(--color-accent-glow));
+  margin-bottom: var(--space-3);
+  line-height: 1;
+}
+
+.login-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--color-text-primary);
+}
+
+.login-subtitle {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-top: var(--space-2);
+}
+
+.login-footer {
+  margin-top: var(--space-6);
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  border-top: 1px solid var(--color-border-subtle);
+  padding-top: var(--space-4);
 }
 
 a { color: var(--color-accent-bright); text-decoration: none; }
@@ -339,6 +410,20 @@ img, svg { display: block; max-width: 100%; }
 .kpi-card--high::before     { background: var(--color-p2); }
 .kpi-card--medium::before   { background: var(--color-p3); }
 .kpi-card--low::before      { background: var(--color-p4); }
+.kpi-card--total::before    { background: var(--color-accent-bright); }
+.kpi-card--alert::before    { background: var(--color-p2); }
+.kpi-card--recent::before   { background: var(--color-accent); }
+.kpi-card--response::before { background: var(--color-info); }
+.kpi-card--integrity::before { background: var(--color-p4); }
+
+.status-good {
+  color: var(--color-p4) !important;
+  text-shadow: 0 0 10px rgba(34,197,94,0.4);
+}
+.status-bad {
+  color: var(--color-p1) !important;
+  text-shadow: 0 0 10px rgba(239,68,68,0.4);
+}
 
 .kpi-card__value {
   font-size: 2.5rem;
