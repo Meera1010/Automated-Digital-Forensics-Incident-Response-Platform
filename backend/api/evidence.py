@@ -14,6 +14,7 @@ from flask_jwt_extended import jwt_required
 
 from backend.models.evidence_artifact import EvidenceArtifact
 from backend.utils.error_handlers import ResourceNotFoundError
+from backend.utils.decorators import roles_required
 from backend.vault import vault_manager
 
 evidence_bp = Blueprint("evidence", __name__)
@@ -32,6 +33,7 @@ def get_artifact_metadata(artifact_id):
 
 @evidence_bp.get("/<uuid:artifact_id>/download")
 @jwt_required()
+@roles_required("analyst", "supervisor", "admin")
 def download_artifact(artifact_id):
     """
     Decrypt and stream the artifact to the client.

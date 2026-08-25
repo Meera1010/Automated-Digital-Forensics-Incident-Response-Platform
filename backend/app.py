@@ -202,16 +202,20 @@ def _seed_initial_users(app: Flask) -> None:
     try:
         from backend.models.user import User, UserRole
         if User.query.first() is None:
+            admin = User(username="admin", role=UserRole.ADMIN)
+            admin.set_password("admin123!")
+
             analyst = User(username="analyst", role=UserRole.ANALYST)
             analyst.set_password("analyst123!")
 
             supervisor = User(username="supervisor", role=UserRole.SUPERVISOR)
             supervisor.set_password("supervisor123!")
 
+            db.session.add(admin)
             db.session.add(analyst)
             db.session.add(supervisor)
             db.session.commit()
-            logger.info("Seeded default users: 'analyst' and 'supervisor'.")
+            logger.info("Seeded default users: 'admin', 'analyst', and 'supervisor'.")
     except Exception as exc:
         logger.debug("Skipping user seed (DB tables not yet created): %s", exc)
 

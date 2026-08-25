@@ -76,6 +76,8 @@ def validate_password_complexity(password: str) -> None:
 # ---------------------------------------------------------------------------
 
 @auth_bp.post("/register")
+@jwt_required()
+@roles_required("admin")
 def register():
     """
     Register a new user account.
@@ -160,8 +162,20 @@ def login():
 
     user = User.query.filter_by(username=username).first()
 
+    # To mitigate timing attacks, we use a dummy hash if the user is not found
+    from werkzeug.security import check_password_hash, generate_password_hash
+    # A pre-computed bcrypt hash for the word 'dummy'
+    dummy_hash = "$2b$12$L8vO.pY.jZk7J2dY5D.Y4uN.1Kx.gZ8oT/U2lF8P0S5.1o.M6f0c6"
+    
+    is_valid = False
+    if user and user.is_active:
+        is_valid = user.check_password(password)
+    else:
+        # Dummy check to balance response time
+        check_password_hash(dummy_hash, password)
+
     # Fail securely if user not found, inactive, or password invalid
-    if not user or not user.is_active or not user.check_password(password):
+    if not is_valid:
         write_audit(
             module="auth",
             action="auth.login_failed",

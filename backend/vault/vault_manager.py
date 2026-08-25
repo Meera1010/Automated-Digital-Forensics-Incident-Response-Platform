@@ -130,7 +130,12 @@ def retrieve(artifact_id: str) -> bytes:
         ResourceNotFoundError: If artifact record is missing.
         EvidenceTamperedException: If computed SHA-256 hash does not match stored hash.
     """
-    artifact = db.session.get(EvidenceArtifact, uuid.UUID(artifact_id))
+    try:
+        artifact_uuid = uuid.UUID(artifact_id)
+    except ValueError as e:
+        raise ResourceNotFoundError(f"Evidence artifact {artifact_id} not found.") from e
+
+    artifact = db.session.get(EvidenceArtifact, artifact_uuid)
     if not artifact:
         raise ResourceNotFoundError(f"Evidence artifact {artifact_id} not found.")
 

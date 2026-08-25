@@ -14,6 +14,7 @@ Endpoints:
 
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
+from backend.utils.decorators import roles_required
 
 incidents_bp = Blueprint("incidents", __name__)
 
@@ -77,6 +78,7 @@ def get_audit(incident_id):
 
 @incidents_bp.post("/<uuid:incident_id>/close")
 @jwt_required()
+@roles_required("supervisor", "admin")
 def close_incident(incident_id):
     """
     Manually close an incident.
