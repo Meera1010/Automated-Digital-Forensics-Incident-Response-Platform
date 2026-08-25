@@ -1,0 +1,90 @@
+[
+  {
+    "id": "76fc057e-f3e0-4a96-848f-b920e8733425",
+    "received_at": "2026-08-24T10:37:47.519335+00:00",
+    "source_tag": "SYN-GEN-42",
+    "event_type": "file_delete",
+    "source_ip": "193.106.222.120",
+    "dest_ip": "10.0.73.176",
+    "username": "laura.franklin",
+    "asset_id": "SYN-HOST-405",
+    "payload_json": {
+      "is_synthetic": true,
+      "environment": "lab",
+      "description": "Synthetic file_delete event",
+      "file_path": "C:\\Users\\Bob\\Documents\\report.docx",
+      "file_hash": "f11b7517e38d196a6b3457ffcff16eda2347a6c1a3cc0e47b7dc21a309a4d344"
+    }
+  },
+  {
+    "id": "2a764802-f83f-428f-bbea-4b7baa63ebb8",
+    "received_at": "2026-08-24T11:59:23.519335+00:00",
+    "source_tag": "SYN-GEN-27",
+    "event_type": "process_start",
+    "source_ip": "9.151.214.194",
+    "dest_ip": "10.0.78.36",
+    "username": "christine.underwood",
+    "asset_id": "SYN-HOST-156",
+    "payload_json": {
+      "is_synthetic": true,
+      "environment": "lab",
+      "description": "Synthetic process_start event",
+      "process_name": "/usr/sbin/sshd",
+      "pid": 3995,
+      "parent_pid": 747
+    }
+  },
+  {
+    "id": "f02729a9-94bf-4d29-9b6d-4c4fe0f7c09e",
+    "received_at": "2026-08-24T23:58:29.519335+00:00",
+    "source_tag": "SYN-GEN-58",
+    "event_type": "auth_failure",
+    "source_ip": "57.108.32.72",
+    "dest_ip": "10.0.131.10",
+    "username": "kathryn.banks",
+    "asset_id": "SYN-HOST-944",
+    "payload_json": {
+      "is_synthetic": true,
+      "environment": "lab",
+      "description": "Synthetic auth_failure event",
+      "src_ip": "57.108.32.72",
+      "auth_method": "publickey",
+      "port": 22
+    }
+  },
+  {
+    "id": "862d11eb-01bd-4e58-98f2-1e5188896f2b",
+    "received_at": "2026-08-25T01:06:55.519335+00:00",
+    "source_tag": "SYN-GEN-86",
+    "event_type": "file_create",
+    "source_ip": "15.60.106.89",
+    "dest_ip": "10.0.17.165",
+    "username": "jessica.hughes",
+    "asset_id": "SYN-HOST-965",
+    "payload_json": {
+      "is_synthetic": true,
+      "environment": "lab",
+      "description": "Synthetic file_create event",
+      "file_path": "/var/log/syslog",
+      "file_hash": "4fa5693dd818f663c008f2cd196b835dd04b36f3f45e62ab680f7f06ca5be58c"
+    }
+  },
+  {
+    "id": "c1437cca-3569-4e1b-a930-41fb741700c4",
+    "received_at": "2026-08-25T04:36:23.519335+00:00",
+    "source_tag": "SYN-GEN-94",
+    "event_type": "auth_success",
+    "source_ip": "151.59.153.243",
+    "dest_ip": "10.0.162.74",
+    "username": "jill.brown",
+    "asset_id": "SYN-HOST-517",
+    "payload_json": {
+      "is_synthetic": true,
+      "environment": "lab",
+      "description": "Synthetic auth_success event",
+      "src_ip": "151.59.153.243",
+      "auth_method": "password",
+      "port": 22
+    }
+  }
+]

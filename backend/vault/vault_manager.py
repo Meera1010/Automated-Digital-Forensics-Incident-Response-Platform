@@ -22,8 +22,12 @@ from backend.utils.error_handlers import EvidenceTamperedException, ResourceNotF
 from backend.vault.encryptor import decrypt, encrypt
 from backend.vault.hasher import compute_hash, verify_hash
 
+from cryptography.exceptions import InvalidTag
+
 logger = logging.getLogger(__name__)
 
+
+from datetime import datetime, timezone
 
 def _get_master_key() -> bytes:
     """Retrieve and decode the 32-byte master AES key from app config."""
@@ -39,16 +43,20 @@ def store(
     artifact_type: str,
     incident_id: Optional[str] = None,
     filename: Optional[str] = None,
+    source: str = "unknown",
+    metadata: Optional[dict] = None,
 ) -> EvidenceArtifact:
 
     """
-    Hash, encrypt with AES-256-GCM, and persist an evidence artifact to disk + DB.
+    Hash, encrypt with AES-256-GCM, and persist an evidence artifact to the database.
 
     Args:
         artifact_bytes: Raw bytes of the artifact to store.
         artifact_type: Type identifier (e.g. 'memory_dump', 'pcap', 'log_export').
         incident_id: Associated incident UUID string (optional).
         filename: Original file name (optional).
+        source: Source of the evidence.
+        metadata: Arbitrary metadata dictionary.
 
     Returns:
         The created EvidenceArtifact model instance.
@@ -61,35 +69,36 @@ def store(
     # 2. Encrypt plaintext using AES-256-GCM
     ciphertext, iv = encrypt(artifact_bytes, master_key)
 
-    # 3. Determine storage directory and file path
-    vault_dir = current_app.config.get("EVIDENCE_VAULT_PATH", "data/evidence")
-    os.makedirs(vault_dir, exist_ok=True)
-
     artifact_uuid = uuid.uuid4()
     file_name = filename or f"{artifact_type}_{artifact_uuid.hex[:8]}.bin"
-    file_path = os.path.join(vault_dir, f"{artifact_uuid.hex}.bin")
 
-    # 4. Write encrypted ciphertext to disk
-    with open(file_path, "wb") as f:
-        f.write(ciphertext)
+    chain_of_custody_init = [{
+        "action": "collected",
+        "actor": "system",
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }]
 
-    # 5. Create database record
+    # 3. Create database record
     artifact = EvidenceArtifact(
         id=artifact_uuid,
         incident_id=uuid.UUID(incident_id) if incident_id else None,
+        collected_at=datetime.now(timezone.utc),
         artifact_type=artifact_type,
-        file_name=file_name,
-        file_path=file_path,
-        file_size_bytes=len(artifact_bytes),
+        original_filename=file_name,
         sha256_hash=sha256,
-        encryption_iv=iv.hex(),
-        storage_status="STORED",
+        encrypted_blob=ciphertext,
+        iv=iv,
+        encryption_key_id="default_master_key",
+        size_bytes=len(artifact_bytes),
+        source=source,
+        artifact_metadata=metadata or {},
+        chain_of_custody=chain_of_custody_init,
     )
 
     db.session.add(artifact)
     db.session.commit()
 
-    # 6. Audit trail log
+    # 4. Audit trail log
     write_audit(
         module="vault.vault_manager",
         action="evidence.stored",
@@ -97,7 +106,7 @@ def store(
         target_id=str(artifact.id),
         detail={
             "artifact_type": artifact_type,
-            "file_size_bytes": len(artifact_bytes),
+            "size_bytes": len(artifact_bytes),
             "sha256_hash": sha256,
             "incident_id": incident_id,
         },
@@ -118,25 +127,35 @@ def retrieve(artifact_id: str) -> bytes:
         The decrypted plaintext bytes.
 
     Raises:
-        ResourceNotFoundError: If artifact record or file is missing.
+        ResourceNotFoundError: If artifact record is missing.
         EvidenceTamperedException: If computed SHA-256 hash does not match stored hash.
     """
-    artifact = EvidenceArtifact.query.get(uuid.UUID(artifact_id))
+    artifact = db.session.get(EvidenceArtifact, uuid.UUID(artifact_id))
     if not artifact:
         raise ResourceNotFoundError(f"Evidence artifact {artifact_id} not found.")
 
-    if not os.path.exists(artifact.file_path):
-        raise ResourceNotFoundError(f"Artifact file on disk missing: {artifact.file_path}")
-
-    # 1. Read ciphertext from disk
-    with open(artifact.file_path, "rb") as f:
-        ciphertext = f.read()
+    # 1. Read ciphertext from DB
+    ciphertext = artifact.encrypted_blob
+    iv_bytes = artifact.iv
 
     master_key = _get_master_key()
-    iv_bytes = bytes.fromhex(artifact.encryption_iv)
 
     # 2. Decrypt ciphertext using AES-256-GCM
-    plaintext = decrypt(ciphertext, master_key, iv_bytes)
+    try:
+        plaintext = decrypt(ciphertext, master_key, iv_bytes)
+    except InvalidTag:
+        logger.error("TAMPERING DETECTED (InvalidTag) for artifact %s!", artifact_id)
+        write_audit(
+            module="vault.vault_manager",
+            action="evidence.integrity_failure",
+            target_type="evidence_artifact",
+            target_id=artifact_id,
+            detail={"error": "Invalid cryptography tag (AES-GCM decryption failed)"},
+        )
+        raise EvidenceTamperedException(
+            f"Integrity check failed for artifact {artifact_id}! "
+            "Data may have been altered or corrupted."
+        )
 
     # 3. Verify SHA-256 integrity
     if not verify_hash(plaintext, artifact.sha256_hash):
@@ -165,3 +184,75 @@ def retrieve(artifact_id: str) -> bytes:
     return plaintext
 
 
+def verify_evidence(artifact_id: str) -> bool:
+    """
+    Verify the SHA-256 integrity of an evidence artifact without returning the plaintext.
+    
+    Args:
+        artifact_id: UUID string of the evidence artifact.
+        
+    Returns:
+        True if the evidence is intact.
+        
+    Raises:
+        ResourceNotFoundError: If artifact record is missing.
+        EvidenceTamperedException: If computed SHA-256 hash does not match stored hash.
+        ValueError: If the artifact_id is not a valid UUID.
+    """
+    try:
+        artifact_uuid = uuid.UUID(artifact_id)
+    except ValueError as e:
+        raise ValueError(f"Invalid artifact ID format: {artifact_id}") from e
+
+    artifact = db.session.get(EvidenceArtifact, artifact_uuid)
+    if not artifact:
+        raise ResourceNotFoundError(f"Evidence artifact {artifact_id} not found.")
+
+    # 1. Read ciphertext from DB
+    ciphertext = artifact.encrypted_blob
+    iv_bytes = artifact.iv
+
+    master_key = _get_master_key()
+
+    # 2. Decrypt ciphertext using AES-256-GCM
+    try:
+        plaintext = decrypt(ciphertext, master_key, iv_bytes)
+    except InvalidTag:
+        logger.error("TAMPERING DETECTED (InvalidTag) during verification for artifact %s!", artifact_id)
+        write_audit(
+            module="vault.vault_manager",
+            action="evidence.integrity_failure",
+            target_type="evidence_artifact",
+            target_id=artifact_id,
+            detail={"error": "Invalid cryptography tag (AES-GCM decryption failed)"},
+        )
+        raise EvidenceTamperedException(
+            f"Integrity check failed for artifact {artifact_id}! "
+            "Data may have been altered or corrupted."
+        )
+
+    # 3. Verify SHA-256 integrity
+    if not verify_hash(plaintext, artifact.sha256_hash):
+        logger.error("TAMPERING DETECTED during verification for artifact %s!", artifact_id)
+        write_audit(
+            module="vault.vault_manager",
+            action="evidence.integrity_failure",
+            target_type="evidence_artifact",
+            target_id=artifact_id,
+            detail={"expected_hash": artifact.sha256_hash},
+        )
+        raise EvidenceTamperedException(
+            f"Integrity check failed for artifact {artifact_id}! "
+            "Data may have been altered or corrupted."
+        )
+
+    # 4. Audit trail log
+    write_audit(
+        module="vault.vault_manager",
+        action="evidence.verified",
+        target_type="evidence_artifact",
+        target_id=artifact_id,
+        detail={"sha256_hash": artifact.sha256_hash},
+    )
+
+    return True

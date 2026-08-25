@@ -20,10 +20,21 @@ from apscheduler.schedulers.background import BackgroundScheduler
 db = SQLAlchemy()
 
 # ---------------------------------------------------------------------------
-# JWTManager — stateless JWT authentication
+# JWTManager — stateless JWT authentication + revocation list
 # License: MIT
 # ---------------------------------------------------------------------------
 jwt = JWTManager()
+
+# In-memory token blocklist for revoked JWT tokens (JTI)
+token_blocklist = set()
+
+
+@jwt.token_in_blocklist_loader
+def check_if_token_revoked(jwt_header, jwt_payload: dict) -> bool:
+    """Return True if the token's JTI is in the revoked blocklist."""
+    jti = jwt_payload.get("jti")
+    return jti in token_blocklist
+
 
 # ---------------------------------------------------------------------------
 # CORS — cross-origin resource sharing for the frontend

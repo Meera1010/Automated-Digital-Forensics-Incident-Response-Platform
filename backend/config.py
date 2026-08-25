@@ -155,13 +155,16 @@ class TestingConfig(BaseConfig):
     TESTING = True
 
     SQLALCHEMY_DATABASE_URI: str = os.environ.get(
-        "TEST_DATABASE_URL",
+        "TEST_DATABASE_URL"
+    ) or os.environ.get(
+        "DATABASE_URL",
         "postgresql://adfir_user:adfir_pass@localhost:5432/adfir_test_db",
     )
 
+
     # Fixed AES key for reproducible test vectors — not used outside tests.
     AES_MASTER_KEY = (
-        "test0000000000000000000000000000000000000000000000000000000000001"
+        "deadbeef00000000000000000000000000000000000000000000000000000000"
     )
 
     # Short-lived tokens so expiry tests run fast.

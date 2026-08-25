@@ -42,7 +42,7 @@ class EvidenceArtifact(UUIDPrimaryKeyMixin, db.Model):
     incident_id = Column(
         UUID(as_uuid=True),
         ForeignKey("incidents.id", ondelete="CASCADE"),
-        nullable=False,
+        nullable=True,
         index=True,
     )
 
@@ -71,6 +71,12 @@ class EvidenceArtifact(UUIDPrimaryKeyMixin, db.Model):
     # Size (bytes) of the unencrypted artifact — stored for display.
     size_bytes = Column(Integer, nullable=False, default=0)
 
+    # Source of the evidence (e.g. 'SyntheticGenerator', 'Endpoint')
+    source = Column(String(256), nullable=False, default="unknown")
+
+    # Arbitrary metadata related to the evidence
+    artifact_metadata = Column(JSONB, nullable=False, default=dict)
+
     # Chain-of-custody log: [{action, actor, timestamp}] — append-only in code.
     chain_of_custody = Column(JSONB, nullable=False, default=list)
 
@@ -94,6 +100,8 @@ class EvidenceArtifact(UUIDPrimaryKeyMixin, db.Model):
             "sha256_hash": self.sha256_hash,
             "encryption_key_id": self.encryption_key_id,
             "size_bytes": self.size_bytes,
+            "source": self.source,
+            "artifact_metadata": self.artifact_metadata or {},
             "chain_of_custody": self.chain_of_custody or [],
         }
         # The encrypted blob is never included in API list responses.

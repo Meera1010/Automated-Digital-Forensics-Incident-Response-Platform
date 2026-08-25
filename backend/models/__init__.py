@@ -27,6 +27,7 @@ from backend.models.evidence_artifact import EvidenceArtifact, ArtifactType
 from backend.models.response_action import ResponseAction, ActionStatus
 from backend.models.audit_log import AuditLog
 from backend.models.report import Report, ReportFormat
+from backend.models.investigation_record import InvestigationRecord
 
 __all__ = [
     # Base utilities
@@ -55,4 +56,5 @@ __all__ = [
     "AuditLog",
     "Report",
     "ReportFormat",
+    "InvestigationRecord",
 ]

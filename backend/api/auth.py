@@ -12,38 +12,155 @@ TODO (Phase 1):
   - Write audit log entry on every successful and failed login.
 """
 
+import re
 from uuid import UUID
 
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import create_access_token, get_jwt, get_jwt_identity, jwt_required
+from marshmallow import Schema, fields, validate, ValidationError
 
 from backend.audit.writer import write_audit
-from backend.extensions import db
+from backend.extensions import db, token_blocklist
 from backend.models.user import User, UserRole
 from backend.utils.datetime_utils import utc_now
+from backend.utils.decorators import roles_required
 from backend.utils.error_handlers import ResourceNotFoundError
 
 auth_bp = Blueprint("auth", __name__)
 
 
+# ---------------------------------------------------------------------------
+# Input Validation Schemas (Marshmallow)
+# ---------------------------------------------------------------------------
+
+class UserRegisterSchema(Schema):
+    """Input validation for user registration."""
+    username = fields.String(
+        required=True,
+        validate=[
+            validate.Length(min=3, max=32, error="Username must be between 3 and 32 characters."),
+            validate.Regexp(r"^[a-zA-Z0-9_\-]+$", error="Username can only contain letters, numbers, underscores, and hyphens."),
+        ],
+    )
+    password = fields.String(
+        required=True,
+        validate=[
+            validate.Length(min=8, max=128, error="Password must be at least 8 characters long."),
+        ],
+    )
+    role = fields.String(
+        required=False,
+        load_default="viewer",
+        validate=validate.OneOf(["admin", "analyst", "viewer", "supervisor", "readonly"]),
+    )
+
+
+class UserLoginSchema(Schema):
+    """Input validation for user login."""
+    username = fields.String(required=True, validate=validate.Length(min=1))
+    password = fields.String(required=True, validate=validate.Length(min=1))
+
+
+register_schema = UserRegisterSchema()
+login_schema = UserLoginSchema()
+
+
+def validate_password_complexity(password: str) -> None:
+    """Ensure password meets baseline complexity requirements (letter + digit)."""
+    if not re.search(r"[A-Za-z]", password) or not re.search(r"\d", password):
+        raise ValidationError("Password must contain at least one letter and one number.")
+
+
+# ---------------------------------------------------------------------------
+# API Endpoints
+# ---------------------------------------------------------------------------
+
+@auth_bp.post("/register")
+def register():
+    """
+    Register a new user account.
+    Request body: { "username": str, "password": str, "role": "admin"|"analyst"|"viewer" }
+    """
+    json_data = request.get_json(silent=True) or {}
+
+    try:
+        data = register_schema.load(json_data)
+        validate_password_complexity(data["password"])
+    except ValidationError as err:
+        return jsonify({"error": {"code": 400, "message": "Validation error", "details": err.messages}}), 400
+
+    username = data["username"].strip()
+    password = data["password"]
+    role_str = data.get("role", "viewer").lower()
+
+    # Map role string to UserRole Enum
+    role_map = {
+        "admin": UserRole.ADMIN,
+        "supervisor": UserRole.ADMIN,
+        "analyst": UserRole.ANALYST,
+        "viewer": UserRole.VIEWER,
+        "readonly": UserRole.VIEWER,
+    }
+    target_role = role_map.get(role_str, UserRole.VIEWER)
+
+    # Check if username already exists
+    existing = User.query.filter_by(username=username).first()
+    if existing:
+        write_audit(
+            module="auth",
+            action="auth.register_failed",
+            actor_type="user",
+            actor_id=username,
+            detail={"reason": "Username already taken"},
+        )
+        return jsonify({
+            "error": {"code": 409, "message": f"Username '{username}' is already registered."}
+        }), 409
+
+    # Create new user and hash password securely
+    user = User(
+        username=username,
+        role=target_role,
+        is_active=True,
+    )
+    user.set_password(password)
+
+    db.session.add(user)
+    db.session.commit()
+
+    write_audit(
+        module="auth",
+        action="auth.registered",
+        actor_type="user",
+        actor_id=str(user.id),
+        detail={"username": user.username, "role": user.role.value},
+    )
+
+    return jsonify({
+        "message": f"User '{username}' registered successfully.",
+        "user": user.to_dict(),
+    }), 201
+
+
 @auth_bp.post("/login")
 def login():
     """
-    Authenticate a user and return a signed JWT access token.
+    Authenticate credentials and issue a signed JWT access token.
     Request body: { "username": str, "password": str }
     """
-    data = request.get_json(silent=True) or {}
-    username = data.get("username", "").strip()
-    password = data.get("password", "")
+    json_data = request.get_json(silent=True) or {}
 
-    if not username or not password:
-        return jsonify({
-            "error": {"code": 400, "message": "Username and password are required."}
-        }), 400
+    try:
+        data = login_schema.load(json_data)
+    except ValidationError as err:
+        return jsonify({"error": {"code": 400, "message": "Validation error", "details": err.messages}}), 400
+
+    username = data["username"].strip()
+    password = data["password"]
 
     user = User.query.filter_by(username=username).first()
 
-    # Fail if user not found, inactive, or password check fails
+    # Fail securely if user not found, inactive, or password invalid
     if not user or not user.is_active or not user.check_password(password):
         write_audit(
             module="auth",
@@ -60,7 +177,7 @@ def login():
     user.last_login_at = utc_now()
     db.session.commit()
 
-    # Issue JWT access token
+    # Issue JWT access token with role and username claims
     access_token = create_access_token(
         identity=str(user.id),
         additional_claims={
@@ -88,23 +205,29 @@ def login():
 @jwt_required()
 def logout():
     """
-    Acknowledge a logout request.
-    Client discards token from storage.
+    Revoke current JWT access token by adding its JTI to the token blocklist.
     """
     user_id = get_jwt_identity()
+    jwt_payload = get_jwt()
+    jti = jwt_payload.get("jti")
+
+    if jti:
+        token_blocklist.add(jti)
+
     write_audit(
         module="auth",
         action="auth.logout",
         actor_type="user",
         actor_id=str(user_id),
+        detail={"jti": jti},
     )
-    return jsonify({"message": "Logged out successfully"}), 200
+    return jsonify({"message": "Logged out successfully and token revoked."}), 200
 
 
 @auth_bp.get("/me")
 @jwt_required()
 def me():
-    """Return the authenticated user's profile information."""
+    """Return profile information for the authenticated user."""
     user_id = get_jwt_identity()
     try:
         user = User.query.get(UUID(user_id))
@@ -115,4 +238,18 @@ def me():
         raise ResourceNotFoundError("User account not found or inactive.")
 
     return jsonify(user.to_dict()), 200
+
+
+@auth_bp.get("/users")
+@roles_required("admin")
+def list_users():
+    """
+    Return list of all registered user accounts (Admin only).
+    """
+    users = User.query.order_by(User.created_at.desc()).all()
+    return jsonify({
+        "users": [user.to_dict() for user in users],
+        "total": len(users),
+    }), 200
+
 

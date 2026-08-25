@@ -22,9 +22,12 @@ from backend.models.base import TimestampMixin, UUIDPrimaryKeyMixin
 
 
 class UserRole(enum.Enum):
-    READONLY = "readonly"
+    ADMIN = "admin"
     ANALYST = "analyst"
+    VIEWER = "viewer"
     SUPERVISOR = "supervisor"
+    READONLY = "readonly"
+
 
 
 class User(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):

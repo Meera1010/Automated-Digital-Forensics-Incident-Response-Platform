@@ -36,7 +36,13 @@ def db_session(app):
     TODO (Phase 1): Wire up table creation and rollback.
     """
     from backend.extensions import db as _db
+    import backend.models
+    from sqlalchemy import text
     with app.app_context():
-        # TODO: Create all tables before the test session.
-        # TODO: Roll back the transaction after each test.
+        _db.session.execute(text("DROP SCHEMA public CASCADE; CREATE SCHEMA public;"))
+        _db.session.commit()
+        _db.create_all()
         yield _db.session
+        _db.session.remove()
+        _db.session.execute(text("DROP SCHEMA public CASCADE; CREATE SCHEMA public;"))
+        _db.session.commit()

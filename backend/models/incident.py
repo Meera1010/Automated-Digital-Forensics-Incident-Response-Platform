@@ -6,7 +6,7 @@ DetectionHits are correlated together, and progresses through a defined
 state machine until it is closed.
 
 State machine:
-  NEW → INVESTIGATING → CLASSIFIED → RESPONDING → CONTAINED → CLOSED
+  NEW → INVESTIGATING → CONFIRMED → CONTAINED → RESOLVED (or FALSE_POSITIVE)
 
 All state transitions are recorded in the audit_log.
 """
@@ -23,10 +23,10 @@ from backend.models.base import TimestampMixin, UUIDPrimaryKeyMixin
 class IncidentStatus(enum.Enum):
     NEW = "NEW"
     INVESTIGATING = "INVESTIGATING"
-    CLASSIFIED = "CLASSIFIED"
-    RESPONDING = "RESPONDING"
+    CONFIRMED = "CONFIRMED"
     CONTAINED = "CONTAINED"
-    CLOSED = "CLOSED"
+    RESOLVED = "RESOLVED"
+    FALSE_POSITIVE = "FALSE_POSITIVE"
 
 
 class IncidentSeverity(enum.Enum):
