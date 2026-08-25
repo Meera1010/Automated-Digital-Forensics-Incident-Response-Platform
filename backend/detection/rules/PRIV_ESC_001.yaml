@@ -1,0 +1,19 @@
+﻿rule_id: PRIV_ESC_001
+name: "Privilege Escalation Attempt"
+description: >
+  Detects a sequence where a standard user account first authenticates
+  successfully, then immediately attempts to execute a privileged command
+  (sudo, runas, etc.) within 2 minutes. Suggests credential abuse or
+  post-exploitation escalation.
+rule_type: sequence
+severity_weight: 8
+conditions:
+  steps:
+    - event_type: auth_success
+      field: username
+      operator: not_in
+      value: [admin, root, system]
+    - event_type: privilege_command
+      same_field: username
+      within_seconds: 120
+attack_category: privilege_escalation

@@ -1,0 +1,16 @@
+﻿rule_id: LATERAL_MOVE_001
+name: "Lateral Movement — Multi-Asset Auth Sweep"
+description: >
+  Detects a single source IP successfully authenticating to three or more
+  distinct synthetic assets within 10 minutes. This pattern matches lateral
+  movement behaviour where an attacker traverses the network after initial
+  compromise.
+rule_type: threshold
+event_type_filter: auth_success
+severity_weight: 8
+conditions:
+  group_by: source_ip
+  count_distinct_field: asset_id
+  threshold_count: 3
+  time_window_seconds: 600
+attack_category: lateral_movement

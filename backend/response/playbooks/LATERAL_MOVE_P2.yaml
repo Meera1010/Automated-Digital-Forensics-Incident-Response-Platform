@@ -1,0 +1,17 @@
+﻿name: "Lateral Movement Response - High (P2)"
+attack_category: lateral_movement
+severity_tier: P2
+actions:
+  - action: block_synthetic_ip
+    params:
+      ip_field: source_ip
+      duration_minutes: 120
+      reason: "P2 lateral movement — 2-hour block"
+  - action: capture_memory_snapshot
+    params:
+      target_asset_field: primary_asset_id
+      label: "p2-lateral-move-snapshot"
+  - action: send_alert_notification
+    params:
+      channels: [dashboard, audit_log]
+      message_template: "HIGH: Lateral movement from {source_ip} across {asset_count} assets. Source blocked."

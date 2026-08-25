@@ -1,0 +1,105 @@
+# =============================================================================
+# ADFIR Platform — Python Dependencies
+# Automated Digital Forensics & Incident Response Platform
+# =============================================================================
+# License policy: MIT / BSD / Apache-2.0 only at runtime.
+# No GPL dependencies. psycopg2-binary is LGPL-2.1 (dynamically linked —
+# compliant for use in non-GPL projects per LGPL terms).
+# =============================================================================
+
+# --- Web Framework -----------------------------------------------------------
+# Flask: Micro web framework used for the REST API layer and routing.
+# License: BSD-3-Clause
+Flask>=3.0.0
+
+# Flask-JWT-Extended: JWT authentication with role-based access decorators.
+# License: MIT
+Flask-JWT-Extended>=4.6.0
+
+# Flask-CORS: Cross-Origin Resource Sharing headers for the frontend <-> API.
+# License: MIT
+Flask-CORS>=4.0.0
+
+# Werkzeug: WSGI toolkit bundled with Flask; provides request/response utils.
+# License: BSD-3-Clause
+Werkzeug>=3.0.0
+
+# --- Database ----------------------------------------------------------------
+# SQLAlchemy: ORM and query builder. Provides parameterised queries everywhere.
+# License: MIT
+SQLAlchemy>=2.0.0
+
+# Alembic: Database migration tool built on top of SQLAlchemy.
+# License: MIT
+alembic>=1.13.0
+
+# psycopg2-binary: PostgreSQL adapter for Python. The binary distribution
+# links the libpq C library dynamically, which satisfies LGPL requirements.
+# Alternative (pure Apache-2.0): asyncpg — usable with minor async refactor.
+# License: LGPL-2.1 (dynamic link — compliant for non-GPL use)
+psycopg2-binary>=2.9.9
+
+# --- Validation & Serialisation ---------------------------------------------
+# Marshmallow: Schema-based input validation and serialisation.
+# Used on every API endpoint to enforce strict input contracts.
+# License: MIT
+marshmallow>=3.20.0
+
+# --- Cryptography ------------------------------------------------------------
+# cryptography: Provides AES-256-GCM (evidence encryption) and SHA-256
+# (evidence integrity hashing, audit chain checksums).
+# This is the ONLY cryptography library used — no PyCrypto/PyCryptodome.
+# License: Apache-2.0
+cryptography>=42.0.0
+
+# --- Task Scheduling ---------------------------------------------------------
+# APScheduler: In-process background scheduler (no broker required).
+# Used for detection poll cycles, stale incident checks, rule reloads.
+# License: MIT
+APScheduler>=3.10.0
+
+# --- Configuration -----------------------------------------------------------
+# python-dotenv: Loads environment variables from .env files during development.
+# License: BSD-3-Clause
+python-dotenv>=1.0.0
+
+# --- Templating (Reports) ----------------------------------------------------
+# Jinja2: Template engine for HTML forensic report generation.
+# Bundled with Flask but pinned explicitly for clarity.
+# License: BSD-3-Clause
+Jinja2>=3.1.0
+
+# --- PDF Generation (Reports) ------------------------------------------------
+# WeasyPrint: Converts HTML/CSS reports to PDF. Uses Cairo & Pango system libs.
+# Install system deps first: see README.md § PDF Dependencies.
+# License: BSD-3-Clause
+WeasyPrint>=60.0
+
+# --- YAML Parsing ------------------------------------------------------------
+# PyYAML: Parses detection rule and response playbook YAML definition files.
+# License: MIT
+PyYAML>=6.0.0
+
+# =============================================================================
+# Development & Testing Dependencies (not installed in production)
+# =============================================================================
+
+# pytest: Test runner for unit, integration, and API test suites.
+# License: MIT
+pytest>=8.0.0
+
+# pytest-cov: Code coverage plugin for pytest.
+# License: MIT
+pytest-cov>=5.0.0
+
+# Faker: Generates realistic synthetic personal/network data for test fixtures.
+# License: MIT
+Faker>=24.0.0
+
+# black: Opinionated Python code formatter.
+# License: MIT
+black>=24.0.0
+
+# flake8: PEP-8 linter and style checker.
+# License: MIT
+flake8>=7.0.0

@@ -1,0 +1,25 @@
+﻿name: "Data Exfiltration Response - Critical (P1)"
+attack_category: data_exfiltration
+severity_tier: P1
+actions:
+  - action: block_synthetic_ip
+    params:
+      ip_field: source_ip
+      duration_minutes: 2880
+      reason: "P1 exfiltration — 48-hour block"
+  - action: quarantine_synthetic_asset
+    params:
+      asset_field: primary_asset_id
+      reason: "P1 exfiltration — source asset quarantined"
+  - action: disable_synthetic_service
+    params:
+      service_field: dest_service
+      reason: "P1 exfiltration — outbound service disabled"
+  - action: capture_memory_snapshot
+    params:
+      target_asset_field: primary_asset_id
+      label: "p1-exfil-snapshot"
+  - action: send_alert_notification
+    params:
+      channels: [dashboard, audit_log]
+      message_template: "CRITICAL: Data exfiltration from {primary_asset} to {dest_ip}. Asset quarantined, service disabled."

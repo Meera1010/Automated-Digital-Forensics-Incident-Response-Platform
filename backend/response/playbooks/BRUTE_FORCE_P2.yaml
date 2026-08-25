@@ -1,0 +1,17 @@
+﻿name: "Brute Force Response - High (P2)"
+attack_category: brute_force
+severity_tier: P2
+actions:
+  - action: block_synthetic_ip
+    params:
+      ip_field: source_ip
+      duration_minutes: 60
+      reason: "P2 brute force automated block"
+  - action: send_alert_notification
+    params:
+      channels: [dashboard, audit_log]
+      message_template: "HIGH: Brute force detected from {source_ip}. IP blocked for 60 minutes."
+  - action: capture_memory_snapshot
+    params:
+      target_asset_field: primary_asset_id
+      label: "p2-brute-force-snapshot"

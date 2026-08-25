@@ -1,0 +1,18 @@
+rule_id: BRUTE_FORCE_001
+name: "SSH / RDP Brute Force Attempt"
+description: >
+  Detects rapid successive authentication failures from the same source IP.
+  Five or more failures within 60 seconds strongly indicates automated
+  credential stuffing or brute-force tooling.
+rule_type: threshold
+event_type_filter: auth_failure
+severity_weight: 7
+conditions:
+  group_by: source_ip
+  threshold_count: 5
+  time_window_seconds: 60
+  additional_filters:
+    - field: event_type
+      operator: equals
+      value: auth_failure
+attack_category: brute_force

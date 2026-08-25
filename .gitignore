@@ -1,0 +1,97 @@
+# =============================================================================
+# ADFIR Platform — .gitignore
+# =============================================================================
+
+# --- Python ------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+parts/
+var/
+sdist/
+develop-eggs/
+.installed.cfg
+lib/
+lib64/
+.Python
+
+# --- Virtual Environments ----------------------------------------------------
+.venv/
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.virtualenv/
+
+# --- Environment Variables (NEVER commit real secrets) ----------------------
+.env
+.env.local
+.env.production
+.env.staging
+# Keep .env.example — it is safe to commit (no real secrets)
+
+# --- IDE & Editor ------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.sublime-project
+*.sublime-workspace
+
+# --- Testing & Coverage ------------------------------------------------------
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+.tox/
+nosetests.xml
+test-results/
+
+# --- Database Migrations (keep versions tracked) ----------------------------
+# Do NOT ignore alembic/versions — those should be committed.
+# Ignore only local migration logs.
+alembic.log
+
+# --- Application Data (runtime — never commit) ------------------------------
+# These directories hold actual evidence, reports, and lab simulation state.
+data/evidence/
+data/reports/
+data/lab/
+# Keep the .gitkeep placeholder files so the dirs exist in the repo.
+!data/evidence/.gitkeep
+!data/reports/.gitkeep
+!data/lab/.gitkeep
+
+# --- Logs -------------------------------------------------------------------
+logs/
+*.log
+*.log.*
+
+# --- Generated Reports (tracked in DB, not in git) -------------------------
+backend/reporting/generated/
+
+# --- Temporary Files --------------------------------------------------------
+*.tmp
+*.bak
+*.orig
+.temp/
+tmp/
+
+# --- WeasyPrint Cache --------------------------------------------------------
+fontconfig/
+
+# --- OS Artifacts -----------------------------------------------------------
+.DS_Store
+Desktop.ini
+ehthumbs.db

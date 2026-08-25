@@ -1,0 +1,13 @@
+﻿name: "Port Scan Response - Medium (P3)"
+attack_category: port_scan
+severity_tier: P3
+actions:
+  - action: block_synthetic_ip
+    params:
+      ip_field: source_ip
+      duration_minutes: 30
+      reason: "P3 port scan automated block"
+  - action: send_alert_notification
+    params:
+      channels: [dashboard, audit_log]
+      message_template: "MEDIUM: Port scan from {source_ip} blocked for 30 minutes."

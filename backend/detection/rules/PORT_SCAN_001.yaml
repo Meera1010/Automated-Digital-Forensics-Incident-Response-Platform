@@ -1,0 +1,15 @@
+﻿rule_id: PORT_SCAN_001
+name: "Horizontal Port Scan"
+description: >
+  Detects a single source IP probing 15 or more distinct destination ports
+  within 30 seconds — a classic reconnaissance pattern indicating active
+  network mapping with tools like nmap.
+rule_type: threshold
+event_type_filter: port_probe
+severity_weight: 5
+conditions:
+  group_by: source_ip
+  count_distinct_field: dest_port
+  threshold_count: 15
+  time_window_seconds: 30
+attack_category: port_scan

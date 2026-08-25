@@ -1,0 +1,19 @@
+﻿rule_id: DATA_EXFIL_001
+name: "Large Outbound Data Transfer"
+description: >
+  Detects unusually large outbound data transfers (> 50 MB) to an external
+  synthetic IP within a 5-minute window. A potential data exfiltration
+  indicator when combined with prior reconnaissance activity.
+rule_type: threshold
+event_type_filter: network_transfer
+severity_weight: 9
+conditions:
+  group_by: source_ip
+  sum_field: bytes_sent
+  threshold_sum: 52428800
+  time_window_seconds: 300
+  additional_filters:
+    - field: direction
+      operator: equals
+      value: outbound
+attack_category: data_exfiltration
