@@ -68,3 +68,14 @@ class User(UUIDPrimaryKeyMixin, TimestampMixin, db.Model):
             ),
             "created_at": self.created_at.isoformat(),
         }
+
+    def set_password(self, password: str) -> None:
+        """Hash and set the user's password using werkzeug.security."""
+        from werkzeug.security import generate_password_hash
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password: str) -> bool:
+        """Verify password against stored password hash."""
+        from werkzeug.security import check_password_hash
+        return check_password_hash(self.password_hash, password)
+

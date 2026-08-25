@@ -86,7 +86,13 @@ def create_app(env: str | None = None) -> Flask:
     _bootstrap_storage_dirs(app)
 
     # ------------------------------------------------------------------
-    # 7. Start background scheduler (skip in testing to avoid interference)
+    # 7. Seed initial user accounts if database is empty
+    # ------------------------------------------------------------------
+    with app.app_context():
+        _seed_initial_users(app)
+
+    # ------------------------------------------------------------------
+    # 8. Start background scheduler (skip in testing to avoid interference)
     # ------------------------------------------------------------------
     if not app.config.get("TESTING", False) and app.config.get(
         "SCHEDULER_ENABLED", True
@@ -94,7 +100,7 @@ def create_app(env: str | None = None) -> Flask:
         _start_scheduler(app)
 
     # ------------------------------------------------------------------
-    # 8. Frontend catch-all — serve index.html for any non-API route
+    # 9. Frontend catch-all — serve index.html for any non-API route
     # ------------------------------------------------------------------
     @app.route("/", defaults={"path": ""})
     @app.route("/<path:path>")
@@ -111,6 +117,7 @@ def create_app(env: str | None = None) -> Flask:
         app.config.get("DEBUG"),
     )
     return app
+
 
 
 # ---------------------------------------------------------------------------
@@ -186,3 +193,23 @@ def _start_scheduler(app: Flask) -> None:
     if not scheduler.running:
         scheduler.start()
     logger.info("Background scheduler started.")
+
+
+def _seed_initial_users(app: Flask) -> None:
+    """Seed initial analyst and supervisor user accounts if the users table is empty."""
+    try:
+        from backend.models.user import User, UserRole
+        if User.query.first() is None:
+            analyst = User(username="analyst", role=UserRole.ANALYST)
+            analyst.set_password("analyst123!")
+
+            supervisor = User(username="supervisor", role=UserRole.SUPERVISOR)
+            supervisor.set_password("supervisor123!")
+
+            db.session.add(analyst)
+            db.session.add(supervisor)
+            db.session.commit()
+            logger.info("Seeded default users: 'analyst' and 'supervisor'.")
+    except Exception as exc:
+        logger.debug("Skipping user seed (DB tables not yet created): %s", exc)
+
