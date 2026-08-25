@@ -1,0 +1,30 @@
+{
+  "generated_at": "2026-08-25T10:35:52.592822+00:00",
+  "incident": {
+    "id": "87254432-2440-463d-895a-e939b9bdf7c8",
+    "incident_number": "INC-REPORT-JSON",
+    "title": "Test Incident JSON",
+    "status": "NEW",
+    "severity": "P2",
+    "attack_category": "PHISHING",
+    "primary_asset_id": null,
+    "summary_text": null,
+    "opened_at": null,
+    "classified_at": null,
+    "contained_at": null,
+    "closed_at": null,
+    "assigned_playbook_id": null,
+    "created_at": "2026-08-25T10:35:49.431357+00:00",
+    "updated_at": "2026-08-25T10:35:49.431357+00:00"
+  },
+  "investigation": {
+    "detection_reason": "No investigation record found.",
+    "timeline": [],
+    "indicators": [],
+    "summary": ""
+  },
+  "detection_hits": [],
+  "evidence": [],
+  "responses": [],
+  "audit_logs": []
+}

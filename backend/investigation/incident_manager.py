@@ -148,3 +148,13 @@ class IncidentManager:
         db.session.add(incident)
         db.session.commit()
 
+        if status == IncidentStatus.RESOLVED.value:
+            try:
+                from backend.reporting.generator import generate_report
+                generate_report(incident_id=incident.id, format_type="html")
+                generate_report(incident_id=incident.id, format_type="json")
+                generate_report(incident_id=incident.id, format_type="pdf")
+            except Exception as e:
+                import logging
+                logging.getLogger(__name__).error(f"Failed to auto-generate reports for {incident.id}: {e}")
+
