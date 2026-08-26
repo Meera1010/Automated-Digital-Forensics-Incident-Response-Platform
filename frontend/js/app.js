@@ -207,18 +207,12 @@ const App = {
 };
 
 // -------------------------------------------------------------------------
-// Stub module objects — will be replaced by section-specific scripts.
+// Stub module objects — for sections that don't have scripts yet.
 // -------------------------------------------------------------------------
 
-const Dashboard        = { load: async () => {} };
-const IncidentsList    = { load: async () => {} };
 const AlertsStream     = { load: async () => {} };
-const EvidenceList     = { load: async () => {} };
 const VerificationList = { load: async () => {} };
-const RulesList        = { load: async () => {} };
 const ResponsesList    = { load: async () => {} };
-const ReportsList      = { load: async () => {} };
-const AuditLog         = { load: async () => {} };
 const SystemStatus     = { load: async () => {} };
 
 // Expose globally for cross-module access.
