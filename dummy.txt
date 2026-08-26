@@ -1,1 +1,1 @@
-Feature 1 implementation\n
+Feature 1 implementation\nFeature 2 implementation\n
