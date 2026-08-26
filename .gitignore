@@ -29,6 +29,8 @@ ENV/
 env.bak/
 venv.bak/
 .virtualenv/
+.venv311/
+myenv/
 
 # --- Environment Variables (NEVER commit real secrets) ----------------------
 .env
@@ -68,6 +70,7 @@ alembic.log
 data/evidence/
 data/reports/
 data/lab/
+storage/
 # Keep the .gitkeep placeholder files so the dirs exist in the repo.
 !data/evidence/.gitkeep
 !data/reports/.gitkeep

@@ -36,6 +36,9 @@ def db_setup(app):
     with app.app_context():
         _db.drop_all()
         _db.create_all()
+        # Seed users for tests since create_app tried before tables existed
+        from backend.app import _seed_initial_users
+        _seed_initial_users(app)
         yield _db
         _db.drop_all()
 

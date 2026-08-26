@@ -164,8 +164,8 @@ def login():
 
     # To mitigate timing attacks, we use a dummy hash if the user is not found
     from werkzeug.security import check_password_hash, generate_password_hash
-    # A pre-computed bcrypt hash for the word 'dummy'
-    dummy_hash = "$2b$12$L8vO.pY.jZk7J2dY5D.Y4uN.1Kx.gZ8oT/U2lF8P0S5.1o.M6f0c6"
+    # A pre-computed scrypt hash for the word 'dummy'
+    dummy_hash = "scrypt:32768:8:1$Fjj1gOEyfgGtg5fy$bd6c993e5b2664f16ec5a005881471496a8d542d1798026ab11872465f10df1f07cd0ce4f807e91187167b4c4ecd787a2338d5fd79b18d85adaa692b0d55b907"
     
     is_valid = False
     if user and user.is_active:

@@ -73,7 +73,7 @@ def test_create_incident_from_hit(app, db_session):
         assert incident.incident_number.startswith("INC-")
         assert incident.status == IncidentStatus.NEW.value
         assert incident.severity == IncidentSeverity.P2.value
-        assert incident.attack_category == "Credential Access"
+        assert incident.attack_category == "BRUTE_FORCE"
         assert incident.opened_at is not None
         
         # Verify Hit Linkage

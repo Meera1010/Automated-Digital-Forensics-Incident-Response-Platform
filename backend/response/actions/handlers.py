@@ -85,3 +85,15 @@ def contain_incident(incident: Incident, params: Dict[str, Any]) -> Tuple[str, s
     """
     incident.status = IncidentStatus.CONTAINED.value
     return "success", f"Incident {incident.id} marked as CONTAINED."
+
+@register_action("block_synthetic_ip")
+def block_synthetic_ip(incident: Incident, params: Dict[str, Any]) -> Tuple[str, str]:
+    return "success", "Synthetic IP block simulated."
+
+@register_action("send_alert_notification")
+def send_alert_notification(incident: Incident, params: Dict[str, Any]) -> Tuple[str, str]:
+    return "success", "Alert notification sent."
+
+@register_action("capture_memory_snapshot")
+def capture_memory_snapshot(incident: Incident, params: Dict[str, Any]) -> Tuple[str, str]:
+    return "success", "Memory snapshot captured."

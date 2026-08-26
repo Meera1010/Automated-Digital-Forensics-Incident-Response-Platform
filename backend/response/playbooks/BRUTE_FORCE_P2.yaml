@@ -1,5 +1,5 @@
-﻿name: "Brute Force Response - High (P2)"
-attack_category: brute_force
+name: "Brute Force Response - High (P2)"
+attack_category: BRUTE_FORCE
 severity_tier: P2
 actions:
   - action: block_synthetic_ip
