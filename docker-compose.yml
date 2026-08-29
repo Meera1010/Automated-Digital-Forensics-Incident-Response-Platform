@@ -1,0 +1,61 @@
+# =============================================================================
+# ADFIR Platform — Docker Compose
+# =============================================================================
+# One-command local development setup:
+#
+#   docker compose up --build
+#
+# This starts:
+#   1. PostgreSQL 15 database with health checks
+#   2. ADFIR Platform application (Flask on port 5000)
+#
+# Open http://localhost:5000 after startup.
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: adfir_user
+      POSTGRES_PASSWORD: adfir_pass
+      POSTGRES_DB: adfir_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U adfir_user -d adfir_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # ADFIR Platform Application
+  # ---------------------------------------------------------------------------
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      FLASK_ENV: development
+      SECRET_KEY: docker-dev-secret-key-change-in-production
+      JWT_SECRET_KEY: docker-dev-jwt-secret-change-in-production
+      AES_MASTER_KEY: dev0000000000000000000000000000000000000000000000000000000000000001
+      DATABASE_URL: postgresql://adfir_user:adfir_pass@db:5432/adfir_db
+      CORS_ORIGINS: http://localhost:5000,http://127.0.0.1:5000
+      SCHEDULER_ENABLED: "True"
+      LOG_LEVEL: DEBUG
+    volumes:
+      - ./data:/app/data
+
+volumes:
+  pgdata:
+    driver: local
